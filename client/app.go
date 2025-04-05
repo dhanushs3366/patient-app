@@ -6,17 +6,29 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/layout"
 )
 
 type Client struct {
 	App    fyne.App
 	Window fyne.Window
+	config *WindowConfig
+}
+
+type WindowConfig struct {
+	Navbar dimensions
+}
+
+type dimensions struct {
+	Height float64
+	Width  float64
 }
 
 func NewClient() *Client {
 	return &Client{
 		App:    app.New(),
 		Window: app.New().NewWindow("Healthcare Assistant"),
+		config: nil,
 	}
 }
 
@@ -29,7 +41,7 @@ func (c *Client) Clear() {
 	c.Window.SetContent(
 		container.NewHBox(),
 	)
-	c.Window.SetContent(c.Navbar())
+	c.Window.SetContent(c.Navbar(c.About()))
 }
 
 func parseWithBorder(topOrLeft, bottomOrRight *fyne.Container, center fyne.CanvasObject, isVertical bool) *fyne.Container {
@@ -44,4 +56,29 @@ func parseWithBorder(topOrLeft, bottomOrRight *fyne.Container, center fyne.Canva
 	} else {
 		return container.NewBorder(nil, nil, topOrLeft, bottomOrRight, center)
 	}
+}
+
+func padContainer(content *fyne.Container, hPad, vPad bool) *fyne.Container {
+	var top, bottom, left, right fyne.CanvasObject
+	if vPad {
+		top = layout.NewSpacer()
+		bottom = layout.NewSpacer()
+	}
+	if hPad {
+		left = layout.NewSpacer()
+		right = layout.NewSpacer()
+	}
+
+	return container.NewPadded(
+		container.NewVBox(
+			top,
+			container.NewHBox(
+				left,
+				content,
+				right,
+			),
+			bottom,
+		),
+	)
+
 }

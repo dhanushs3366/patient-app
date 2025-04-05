@@ -2,7 +2,11 @@ module github.com/dhanushs3366/patient-app
 
 go 1.21.6
 
-require fyne.io/fyne/v2 v2.5.5
+require (
+	fyne.io/fyne/v2 v2.5.5
+	github.com/joho/godotenv v1.5.1
+	github.com/sashabaranov/go-openai v1.38.1
+)
 
 require (
 	fyne.io/systray v1.11.0 // indirect

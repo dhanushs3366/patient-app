@@ -1,25 +1,20 @@
 package main
 
-import "github.com/dhanushs3366/patient-app/client"
+import (
+	"github.com/dhanushs3366/patient-app/api"
+	"github.com/joho/godotenv"
+)
 
 func main() {
-	c := client.NewClient()
-	c.Window.SetContent(c.Navbar())
+	err := godotenv.Load()
 
-	c.Window.ShowAndRun()
+	if err != nil {
+		panic(err)
+	}
+	// c := client.NewClient()
+	// c.Window.SetContent(c.Navbar(c.About()))
+	// c.Window.SetFullScreen(true)
+	// c.Window.ShowAndRun()
 
-	// myApp := app.New()
-	// myWindow := myApp.NewWindow("TabContainer Widget")
-
-	// tabs := container.NewAppTabs(
-	// 	container.NewTabItem("Tab 1", widget.NewLabel("Hello")),
-	// 	container.NewTabItem("Tab 2", widget.NewLabel("World!")),
-	// )
-
-	// //tabs.Append(container.NewTabItemWithIcon("Home", theme.HomeIcon(), widget.NewLabel("Home tab")))
-
-	// tabs.SetTabLocation(container.TabLocationLeading)
-
-	// myWindow.SetContent(tabs)
-	// myWindow.ShowAndRun()
+	api.TestModel()
 }

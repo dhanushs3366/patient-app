@@ -6,8 +6,24 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
 )
+
+func (c *Client) Navbar(content *fyne.Container) *fyne.Container {
+	blue := color.RGBA{R: 0xA2, G: 0xD2, B: 0xFF, A: 0xFF}
+	homeTxt := canvas.NewText("Home", blue)
+
+	homeButton := widget.NewButton(homeTxt.Text, func() {
+		c.Window.SetContent(c.Navbar(content))
+	})
+
+	// Create navbar with spacer for right alignment of exit button
+	navbarContainer := container.NewHBox(homeButton, layout.NewSpacer(), c.streamBtn(), layout.NewSpacer(), c.exitBtn())
+
+	paddedContent := padContainer(content, true, true)
+	return container.NewBorder(navbarContainer, nil, nil, nil, paddedContent)
+}
 
 func (c *Client) About() *fyne.Container {
 
@@ -22,41 +38,13 @@ func (c *Client) About() *fyne.Container {
 	)
 	iconImage := canvas.NewImageFromResource(c.App.Icon())
 	card.SetImage(iconImage)
-	return container.NewHBox(card)
+	aboutContainer := container.NewHBox(card)
+	return aboutContainer
 }
 
-// func (c *Client) Navbar() *fyne.Container {
-// 	// shouldnt clear window it is fixed a2d2ff
-// 	blue := color.RGBA{R: 0xA2, G: 0xD2, B: 0xFF, A: 0xFF}
-// 	homeTxt := canvas.NewText("Home", blue)
-// 	homeButton := widget.NewButton(homeTxt.Text, func() {
-// 		c.Window.SetContent(parseWithBorder(c.Navbar(), nil, c.About(), true))
-// 	})
-// 	navbarContainer := container.NewHBox(homeButton)
-// 	navbarContainer.Resize(fyne.NewSize(c.About().MinSize().Width, c.Window.Canvas().Size().Height))
-// 	return navbarContainer
-// }
+func (c *Client) Stream() *fyne.Container {
+	// should have a container to scan your face
 
-func (c *Client) Navbar() *fyne.Container {
-	blue := color.RGBA{R: 0xA2, G: 0xD2, B: 0xFF, A: 0xFF}
-	homeTxt := canvas.NewText("Home", blue)
+	return nil
 
-	var navbarContainer *fyne.Container
-
-	homeButton := widget.NewButton(homeTxt.Text, func() {
-		// Use window content directly instead of passing navbarContainer
-		c.Window.SetContent(
-			container.NewBorder(navbarContainer, nil, nil, nil, c.About()),
-		)
-	})
-
-	navbarContainer = container.NewHBox(homeButton)
-
-	// Set fixed height for navbar (do NOT use dynamic sizing)
-	navbarContainer.Resize(fyne.NewSize(
-		c.Window.Canvas().Size().Width, // Width fills window
-		50,                             // Fixed height of 50px
-	))
-
-	return navbarContainer
 }
