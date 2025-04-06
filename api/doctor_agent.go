@@ -76,7 +76,7 @@ func GetHealthCareAssistantAgent() *Agent {
 		Try to get the more info from the patient but ask easy questions dont give too many options it will overwhelm them
 		only ask a single line or two line questions to get info
 
-		after you feel like you narrowed their problem and given enough instructions tell the patient to book apointment using our chatbot feature if they are still unsure about it
+		after you feel like you narrowed their problem and given enough instructions tell the patient to book apointment using our chatbot feature if they are still unsure about it~
 	`
 	modelName := "mistralai/mistral-7b-instruct:free"
 

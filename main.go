@@ -16,5 +16,4 @@ func main() {
 	c.Window.SetFullScreen(true)
 	c.Window.ShowAndRun()
 
-	// api.TestModel()
 }

@@ -68,7 +68,7 @@ func chatHandler(c *Client) buttonHandlerFun {
 		if userMsg != "" {
 
 			userSegment := &widget.TextSegment{
-				Text: userMsg,
+				Text: userMsg + "\n",
 				Style: widget.RichTextStyle{
 					ColorName: theme.ColorNamePrimary,
 				},
@@ -77,19 +77,10 @@ func chatHandler(c *Client) buttonHandlerFun {
 			// Add segment to chat history
 			chatHistory.Segments = append(chatHistory.Segments, userSegment)
 
-			// Add a line break
-			lineBreak := &widget.TextSegment{
-				Text:  "\n",
-				Style: widget.RichTextStyle{},
-			}
-			chatHistory.Segments = append(chatHistory.Segments, lineBreak)
-
 			// Clear input and refresh chat display
 			userInput.SetText("")
 			chatHistory.Refresh()
 
-			log.SetFlags(log.Ltime | log.Lshortfile)
-			log.Printf("usr msg:%s\n", userMsg)
 			var botResponse string
 			wg.Add(1)
 			go func() {
@@ -119,7 +110,13 @@ func chatHandler(c *Client) buttonHandlerFun {
 		log.Println("booking appointment")
 	})
 
-	userInputContainer := container.NewGridWithRows(2, userInput, container.NewGridWithColumns(2, sendButton, bookAppointment))
+	clearChat := widget.NewButton("Clear", func() {
+		c.chatBot.Close()
+		chatHistory.Segments = chatHistory.Segments[:1]
+		chatHistory.Refresh()
+	})
+
+	userInputContainer := container.NewGridWithRows(2, userInput, container.NewGridWithColumns(3, sendButton, bookAppointment, clearChat))
 	content := container.NewBorder(nil, userInputContainer, nil, nil, chatHistory)
 
 	handler := func() {
