@@ -11,7 +11,12 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	c := client.NewClient()
+	c, err := client.NewClient()
+
+	if err != nil {
+		panic(err)
+	}
+
 	c.Window.SetContent(c.Navbar(c.About()))
 	c.Window.SetFullScreen(true)
 	c.Window.ShowAndRun()

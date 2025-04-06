@@ -8,12 +8,14 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/layout"
 	"github.com/dhanushs3366/patient-app/api"
+	"github.com/dhanushs3366/patient-app/db"
 )
 
 type Client struct {
 	App     fyne.App
 	Window  fyne.Window
 	chatBot *api.Agent
+	store   *db.Store
 	config  *WindowConfig
 }
 
@@ -26,13 +28,24 @@ type dimensions struct {
 	Width  float64
 }
 
-func NewClient() *Client {
+func NewClient() (*Client, error) {
+	store, err := db.New()
+
+	if err != nil {
+		return nil, err
+	}
+
+	if err := store.Init(); err != nil {
+		return nil, err
+	}
+
 	return &Client{
 		App:     app.New(),
 		Window:  app.New().NewWindow("Healthcare Assistant"),
 		config:  nil,
 		chatBot: api.GetHealthCareAssistantAgent(),
-	}
+		store:   store,
+	}, nil
 }
 
 func (c *Client) Run() {

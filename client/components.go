@@ -19,7 +19,7 @@ func (c *Client) Navbar(content *fyne.Container) *fyne.Container {
 	})
 
 	// Create navbar with spacer for right alignment of exit button
-	navbarContainer := container.New(layout.NewCustomPaddedHBoxLayout(10), homeButton, c.streamBtn(), c.chatBtn(), c.exitBtn())
+	navbarContainer := container.New(layout.NewCustomPaddedHBoxLayout(10), homeButton, c.streamBtn(), c.chatBtn(), c.Login(), c.exitBtn())
 
 	// paddedContent := padContainer(content, true, true)
 	return container.NewBorder(navbarContainer, nil, nil, nil, content)

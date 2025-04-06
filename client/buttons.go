@@ -35,6 +35,14 @@ func (c *Client) streamBtn() *widget.Button {
 	return stream
 }
 
+func (c *Client) Login() *widget.Button {
+	login := widget.NewButton("Login", func() {
+		c.Window.SetContent(c.Navbar(c.DoctorLogin()))
+	})
+
+	return login
+}
+
 // use richtext for buttons
 
 func chatHandler(c *Client) buttonHandlerFun {
