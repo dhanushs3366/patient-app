@@ -39,10 +39,12 @@ func NewAgent(name, instructions, model string) *Agent {
 }
 
 func (a *Agent) Respond(input string) (string, error) {
-	a.history = append(a.history, openai.ChatCompletionMessage{
-		Role:    openai.ChatMessageRoleUser,
-		Content: input,
-	})
+	if input != "" {
+		a.history = append(a.history, openai.ChatCompletionMessage{
+			Role:    openai.ChatMessageRoleUser,
+			Content: input,
+		})
+	}
 	resp, err := a.Client.CreateChatCompletion(
 		context.Background(),
 		openai.ChatCompletionRequest{
@@ -72,7 +74,9 @@ func GetHealthCareAssistantAgent() *Agent {
 		You should also provide assistance via word of mouth. Patient might come for a mental health issue or they might have a phyical bruise but you should be supportive and helpful.
 		They might give you what their symptoms are if it is a sympton that can lead to other health issues you should inform the patient and give them proper precautions they should take.
 		Try to get the more info from the patient but ask easy questions dont give too many options it will overwhelm them
-		it should be a one on one conversation so ask logical question and make it short
+		only ask a single line or two line questions to get info
+
+		after you feel like you narrowed their problem and given enough instructions tell the patient to book apointment using our chatbot feature if they are still unsure about it
 	`
 	modelName := "mistralai/mistral-7b-instruct:free"
 

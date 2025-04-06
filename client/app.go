@@ -7,12 +7,14 @@ import (
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/layout"
+	"github.com/dhanushs3366/patient-app/api"
 )
 
 type Client struct {
-	App    fyne.App
-	Window fyne.Window
-	config *WindowConfig
+	App     fyne.App
+	Window  fyne.Window
+	chatBot *api.Agent
+	config  *WindowConfig
 }
 
 type WindowConfig struct {
@@ -26,9 +28,10 @@ type dimensions struct {
 
 func NewClient() *Client {
 	return &Client{
-		App:    app.New(),
-		Window: app.New().NewWindow("Healthcare Assistant"),
-		config: nil,
+		App:     app.New(),
+		Window:  app.New().NewWindow("Healthcare Assistant"),
+		config:  nil,
+		chatBot: api.GetHealthCareAssistantAgent(),
 	}
 }
 

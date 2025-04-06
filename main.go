@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/dhanushs3366/patient-app/api"
+	"github.com/dhanushs3366/patient-app/client"
 	"github.com/joho/godotenv"
 )
 
@@ -11,10 +11,10 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	// c := client.NewClient()
-	// c.Window.SetContent(c.Navbar(c.About()))
-	// c.Window.SetFullScreen(true)
-	// c.Window.ShowAndRun()
+	c := client.NewClient()
+	c.Window.SetContent(c.Navbar(c.About()))
+	c.Window.SetFullScreen(true)
+	c.Window.ShowAndRun()
 
-	api.TestModel()
+	// api.TestModel()
 }

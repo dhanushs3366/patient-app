@@ -15,14 +15,14 @@ func (c *Client) Navbar(content *fyne.Container) *fyne.Container {
 	homeTxt := canvas.NewText("Home", blue)
 
 	homeButton := widget.NewButton(homeTxt.Text, func() {
-		c.Window.SetContent(c.Navbar(content))
+		c.Window.SetContent(c.Navbar(container.NewCenter(c.About())))
 	})
 
 	// Create navbar with spacer for right alignment of exit button
-	navbarContainer := container.NewHBox(homeButton, layout.NewSpacer(), c.streamBtn(), layout.NewSpacer(), c.exitBtn())
+	navbarContainer := container.New(layout.NewCustomPaddedHBoxLayout(10), homeButton, c.streamBtn(), c.chatBtn(), c.exitBtn())
 
-	paddedContent := padContainer(content, true, true)
-	return container.NewBorder(navbarContainer, nil, nil, nil, paddedContent)
+	// paddedContent := padContainer(content, true, true)
+	return container.NewBorder(navbarContainer, nil, nil, nil, content)
 }
 
 func (c *Client) About() *fyne.Container {
