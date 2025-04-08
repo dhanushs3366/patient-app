@@ -33,19 +33,12 @@ func NewAgent(name, instructions, deploymentName string) *Agent {
 
 	client := openai.NewClientWithConfig(config)
 
-	history := []openai.ChatCompletionMessage{
-		{
-			Role:    openai.ChatMessageRoleSystem,
-			Content: instructions,
-		},
-	}
-
 	return &Agent{
 		Name:              name,
 		Instructions:      instructions,
 		Client:            client,
 		DeployedModelName: deploymentName, // deploymentName used here
-		history:           history,
+		history:           []openai.ChatCompletionMessage{},
 	}
 }
 
@@ -54,6 +47,13 @@ func (a *Agent) Respond(input string) (string, error) {
 		a.history = append(a.history, openai.ChatCompletionMessage{
 			Role:    openai.ChatMessageRoleUser,
 			Content: input,
+		})
+	} else {
+		//  if string is empty
+		//  either its initialisation of the agent or its history is cleared
+		a.history = append(a.history, openai.ChatCompletionMessage{
+			Role:    openai.ChatMessageRoleSystem,
+			Content: a.Instructions,
 		})
 	}
 	resp, err := a.Client.CreateChatCompletion(
@@ -75,7 +75,7 @@ func (a *Agent) Respond(input string) (string, error) {
 }
 
 func (a *Agent) Close() {
-	a.history = nil
+	a.history = []openai.ChatCompletionMessage{}
 }
 
 func GetHealthCareAssistantAgent() *Agent {

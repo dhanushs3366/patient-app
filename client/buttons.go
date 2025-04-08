@@ -120,7 +120,18 @@ func chatHandler(c *Client) buttonHandlerFun {
 
 	clearChat := widget.NewButton("Clear", func() {
 		c.chatBot.Close()
-		chatHistory.Segments = chatHistory.Segments[:1]
+		chatHistory.Segments = []widget.RichTextSegment{}
+		respTxt, err := c.chatBot.Respond("")
+		if err != nil {
+			promptWindow("Error", err.Error(), &c.Window)
+		}
+		respWidget := &widget.TextSegment{
+			Text: respTxt,
+			Style: widget.RichTextStyle{
+				ColorName: theme.ColorNamePrimary,
+			},
+		}
+		chatHistory.Segments = append(chatHistory.Segments, respWidget)
 		chatHistory.Refresh()
 	})
 
