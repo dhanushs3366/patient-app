@@ -6,7 +6,6 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
 
@@ -47,26 +46,25 @@ func (c *Client) Login() *widget.Button {
 
 func chatHandler(c *Client) buttonHandlerFun {
 	var wg sync.WaitGroup
-	chatHistory := widget.NewRichText()
-	chatHistory.Wrapping = fyne.TextWrapBreak
-
+	// add scrollable feature to chat bubbles
+	chatBubbles := []fyne.CanvasObject{}
+	var chatBubble *fyne.Container
 	// User input field
 	userInput := widget.NewEntry()
 
 	// implement loading progress
 	chatBotMsg, err := c.chatBot.Respond("")
-
-	initialText := &widget.TextSegment{
-		Text:  chatBotMsg,
-		Style: widget.RichTextStyle{},
-	}
-
-	chatHistory.Segments = append(chatHistory.Segments, initialText)
-
 	if err != nil {
-		log.Printf("Error,%s\n", err.Error())
-		// implement a pop up window alerting the patient the system is down
+		promptWindow("Error", "AI bot is down", &c.Window)
+		c.Window.SetContent(c.Navbar(c.About()))
 	}
+
+	chatBubble = renderChat(chatBotMsg)
+	chatBubbles = append(chatBubbles, chatBubble)
+
+	// a global contianer that contains all the chat bubbles
+	// used to refresh the chatbubbles
+	chatBox := container.NewVBox(chatBubbles...)
 
 	userInput.SetPlaceHolder("Type your message here...")
 	userInput.Wrapping = fyne.TextWrapBreak
@@ -75,19 +73,12 @@ func chatHandler(c *Client) buttonHandlerFun {
 		userMsg := userInput.Text
 		if userMsg != "" {
 
-			userSegment := &widget.TextSegment{
-				Text: userMsg + "\n",
-				Style: widget.RichTextStyle{
-					ColorName: theme.ColorNamePrimary,
-				},
-			}
-
-			// Add segment to chat history
-			chatHistory.Segments = append(chatHistory.Segments, userSegment)
-
+			chatBubble = renderChat(userMsg)
+			chatBubbles = append(chatBubbles, chatBubble)
+			chatBox.Add(chatBubble)
 			// Clear input and refresh chat display
 			userInput.SetText("")
-			chatHistory.Refresh()
+			chatBox.Refresh()
 
 			var botResponse string
 			wg.Add(1)
@@ -102,15 +93,11 @@ func chatHandler(c *Client) buttonHandlerFun {
 			}()
 
 			wg.Wait()
-			botTextSegment := &widget.TextSegment{
-				Text: botResponse,
-				Style: widget.RichTextStyle{
-					ColorName: theme.ColorNamePrimary,
-				},
-			}
 
-			chatHistory.Segments = append(chatHistory.Segments, botTextSegment)
-			chatHistory.Refresh()
+			chatBubble = renderChat(botResponse)
+			chatBubbles = append(chatBubbles, chatBubble)
+			chatBox.Add(chatBubble)
+			chatBox.Refresh()
 		}
 	})
 
@@ -120,24 +107,22 @@ func chatHandler(c *Client) buttonHandlerFun {
 
 	clearChat := widget.NewButton("Clear", func() {
 		c.chatBot.Close()
-		chatHistory.Segments = []widget.RichTextSegment{}
+		chatBubbles = []fyne.CanvasObject{}
+		chatBox.Objects = nil
 		respTxt, err := c.chatBot.Respond("")
 		if err != nil {
 			promptWindow("Error", err.Error(), &c.Window)
 		}
-		respWidget := &widget.TextSegment{
-			Text: respTxt,
-			Style: widget.RichTextStyle{
-				ColorName: theme.ColorNamePrimary,
-			},
-		}
-		chatHistory.Segments = append(chatHistory.Segments, respWidget)
-		chatHistory.Refresh()
+
+		chatBubbles = append(chatBubbles, renderChat(respTxt))
+		chatBox.Add(chatBubbles[len(chatBubbles)-1])
+		chatBox.Refresh()
 	})
 
 	userInputContainer := container.NewGridWithRows(2, userInput, container.NewGridWithColumns(3, sendButton, bookAppointment, clearChat))
 	// add a toolbar for filtering doctors
-	content := container.NewBorder(nil, userInputContainer, nil, nil, chatHistory)
+	chatBox = container.NewVBox(chatBubbles...)
+	content := container.NewBorder(nil, userInputContainer, nil, nil, container.NewVScroll(chatBox))
 
 	handler := func() {
 		c.Window.SetContent(c.Navbar(content))

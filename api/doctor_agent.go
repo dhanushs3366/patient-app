@@ -69,7 +69,6 @@ func (a *Agent) Respond(input string) (string, error) {
 		return "", err
 	}
 
-	log.Printf("Response: %v", resp.Choices)
 	a.history = append(a.history, resp.Choices[0].Message)
 	return resp.Choices[0].Message.Content, nil
 }

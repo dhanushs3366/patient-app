@@ -144,7 +144,7 @@ func (c *Client) makeCards(doctors []models.Doctor) []fyne.CanvasObject {
 					phoneLabel: phoneEntry,
 				}
 				submit := widget.NewButton("Submit", func() {
-					isValid, invalidStr := checkValidForms("Booking", "Booking is done succesfully", &c.Window, entryMap)
+					isValid, invalidStr := checkValidForms(entryMap)
 
 					if !isValid {
 						promptWindow("Booking", invalidStr, &c.Window)

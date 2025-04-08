@@ -88,7 +88,7 @@ func promptWindow(title, info string, window *fyne.Window) {
 
 // if valid prompt with valid msg
 // if invalid prompt with your own invalid msgs
-func checkValidForms(operation, validMsg string, window *fyne.Window, entires map[*widget.Label]*widget.Entry) (bool, string) {
+func checkValidForms(entires map[*widget.Label]*widget.Entry) (bool, string) {
 	isValid := true
 	invalidLabels := []string{}
 	for label, entry := range entires {
