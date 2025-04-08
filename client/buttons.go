@@ -115,7 +115,7 @@ func chatHandler(c *Client) buttonHandlerFun {
 	})
 
 	bookAppointment := widget.NewButton("Book", func() {
-		log.Println("booking appointment")
+		c.Window.SetContent(c.Navbar(c.BookDoctor()))
 	})
 
 	clearChat := widget.NewButton("Clear", func() {
@@ -125,6 +125,7 @@ func chatHandler(c *Client) buttonHandlerFun {
 	})
 
 	userInputContainer := container.NewGridWithRows(2, userInput, container.NewGridWithColumns(3, sendButton, bookAppointment, clearChat))
+	// add a toolbar for filtering doctors
 	content := container.NewBorder(nil, userInputContainer, nil, nil, chatHistory)
 
 	handler := func() {

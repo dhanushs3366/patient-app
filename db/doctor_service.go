@@ -13,10 +13,9 @@ func (s *Store) UpdateDoctor(doctor *models.Doctor) error {
 	result := s.DB.Save(doctor)
 	return result.Error
 }
-
 func (s *Store) GetDoctorByID(id uint) (*models.Doctor, error) {
 	var doctor models.Doctor
-	result := s.DB.First(&doctor, id)
+	result := s.DB.Preload("Specialisation").First(&doctor, id)
 	if result.Error != nil {
 		return nil, result.Error
 	}
@@ -25,7 +24,7 @@ func (s *Store) GetDoctorByID(id uint) (*models.Doctor, error) {
 
 func (s *Store) GetDoctorBySpecialisation(specialisationID uint) ([]models.Doctor, error) {
 	var doctors []models.Doctor
-	result := s.DB.Where("specialisation_id = ?", specialisationID).Find(&doctors)
+	result := s.DB.Preload("Specialisation").Where("specialisation_id = ?", specialisationID).Find(&doctors)
 	if result.Error != nil {
 		return nil, result.Error
 	}
@@ -34,9 +33,18 @@ func (s *Store) GetDoctorBySpecialisation(specialisationID uint) ([]models.Docto
 
 func (s *Store) GetAllDoctors() ([]models.Doctor, error) {
 	var doctors []models.Doctor
-	result := s.DB.Find(&doctors)
+	result := s.DB.Preload("Specialisation").Find(&doctors)
 	if result.Error != nil {
 		return nil, result.Error
 	}
 	return doctors, nil
+}
+
+func (s *Store) GetDoctorByMail(username string) (*models.Doctor, error) {
+	var doctor models.Doctor
+	result := s.DB.Preload("Specialisation").Where("email = ?", username).First(&doctor)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &doctor, nil
 }

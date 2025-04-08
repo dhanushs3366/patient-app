@@ -9,32 +9,43 @@ import (
 )
 
 type Agent struct {
-	Name         string
-	Instructions string
-	Client       *openai.Client
-	ModelName    string
-	history      []openai.ChatCompletionMessage
+	Name              string
+	Instructions      string
+	Client            *openai.Client
+	DeployedModelName string
+	history           []openai.ChatCompletionMessage
 }
 
-func NewAgent(name, instructions, model string) *Agent {
-	authToken := os.Getenv("OPENROUTER_AI_API_KEY")
-	baseURL := os.Getenv("OPENROUTER_AI_BASE_URL")
-	config := openai.DefaultConfig(authToken)
-	config.BaseURL = baseURL
+func NewAgent(name, instructions, deploymentName string) *Agent {
+	apiKey := os.Getenv("AZURE_AI_API_KEY")
+	endpoint := os.Getenv("AZURE_AI_BASE_URL")
+	apiVersion := os.Getenv("AZURE_AI_API_VERSION")
+
+	if apiKey == "" || endpoint == "" || apiVersion == "" {
+		log.Fatal("Missing Azure OpenAI configuration (API key, base URL, or version)")
+	}
+
+	config := openai.DefaultAzureConfig(apiKey, endpoint)
+	config.APIVersion = apiVersion
+	config.AzureModelMapperFunc = func(model string) string {
+		return deploymentName
+	}
 
 	client := openai.NewClientWithConfig(config)
+
 	history := []openai.ChatCompletionMessage{
 		{
 			Role:    openai.ChatMessageRoleSystem,
 			Content: instructions,
 		},
 	}
+
 	return &Agent{
-		Name:         name,
-		Instructions: instructions,
-		Client:       client,
-		ModelName:    model,
-		history:      history,
+		Name:              name,
+		Instructions:      instructions,
+		Client:            client,
+		DeployedModelName: deploymentName, // deploymentName used here
+		history:           history,
 	}
 }
 
@@ -48,7 +59,7 @@ func (a *Agent) Respond(input string) (string, error) {
 	resp, err := a.Client.CreateChatCompletion(
 		context.Background(),
 		openai.ChatCompletionRequest{
-			Model:    a.ModelName,
+			Model:    a.DeployedModelName,
 			Messages: a.history,
 		},
 	)
@@ -57,6 +68,8 @@ func (a *Agent) Respond(input string) (string, error) {
 		log.Printf("no result from open ai, %s", err.Error())
 		return "", err
 	}
+
+	log.Printf("Response: %v", resp.Choices)
 	a.history = append(a.history, resp.Choices[0].Message)
 	return resp.Choices[0].Message.Content, nil
 }
@@ -78,7 +91,8 @@ func GetHealthCareAssistantAgent() *Agent {
 
 		after you feel like you narrowed their problem and given enough instructions tell the patient to book apointment using our chatbot feature if they are still unsure about it~
 	`
-	modelName := "mistralai/mistral-7b-instruct:free"
+	// modelName := "mistralai/mistral-7b-instruct:free"
+	modelName := "gpt-4o"
 
 	return NewAgent("Health Care Agent", instructions, modelName)
 }
