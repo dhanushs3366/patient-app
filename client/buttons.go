@@ -1,10 +1,12 @@
 package client
 
 import (
+	"image/color"
 	"log"
 	"sync"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
 )
@@ -58,9 +60,10 @@ func chatHandler(c *Client) buttonHandlerFun {
 		promptWindow("Error", "AI bot is down", &c.Window)
 		c.Window.SetContent(c.Navbar(c.About()))
 	}
-
 	chatBubble = renderChat(chatBotMsg, BOT)
 	chatBubbles = append(chatBubbles, chatBubble)
+	invisHLine := canvas.NewRectangle(color.Transparent)
+	invisHLine.SetMinSize(fyne.NewSize(2, 30)) //invisible horizontal line to add space between each convo
 
 	// a global contianer that contains all the chat bubbles
 	// used to refresh the chatbubbles
@@ -69,13 +72,14 @@ func chatHandler(c *Client) buttonHandlerFun {
 	userInput.SetPlaceHolder("Type your message here...")
 	userInput.Wrapping = fyne.TextWrapBreak
 
-	sendButton := widget.NewButton("Send", func() {
+	sendBtnFunc := func() {
 		userMsg := userInput.Text
 		if userMsg != "" {
 
 			chatBubble = renderChat(userMsg, PATIENT)
 			chatBubbles = append(chatBubbles, chatBubble)
 			chatBox.Add(chatBubble)
+			chatBox.Add(invisHLine)
 			// Clear input and refresh chat display
 			userInput.SetText("")
 			chatBox.Refresh()
@@ -97,9 +101,11 @@ func chatHandler(c *Client) buttonHandlerFun {
 			chatBubble = renderChat(botResponse, BOT)
 			chatBubbles = append(chatBubbles, chatBubble)
 			chatBox.Add(chatBubble)
+			chatBox.Add(invisHLine)
 			chatBox.Refresh()
 		}
-	})
+	}
+	sendButton := widget.NewButton("Send", sendBtnFunc)
 
 	bookAppointment := widget.NewButton("Book", func() {
 		c.Window.SetContent(c.Navbar(c.BookDoctor()))
@@ -116,16 +122,21 @@ func chatHandler(c *Client) buttonHandlerFun {
 
 		chatBubbles = append(chatBubbles, renderChat(respTxt, BOT))
 		chatBox.Add(chatBubbles[len(chatBubbles)-1])
+		chatBox.Add(invisHLine)
 		chatBox.Refresh()
 	})
+
+	userInput.OnSubmitted = func(_ string) {
+		sendBtnFunc()
+	}
 
 	userInputContainer := container.NewGridWithRows(2, userInput, container.NewGridWithColumns(3, sendButton, bookAppointment, clearChat))
 	// add a toolbar for filtering doctors
 	chatBox = container.NewVBox(chatBubbles...)
-	content := container.NewBorder(nil, userInputContainer, nil, nil, container.NewVScroll(chatBox))
+	chatRoom := container.NewBorder(nil, userInputContainer, nil, nil, container.NewVScroll(chatBox))
 
 	handler := func() {
-		c.Window.SetContent(c.Navbar(content))
+		c.Window.SetContent(c.Navbar(chatRoom))
 	}
 
 	return handler

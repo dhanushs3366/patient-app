@@ -23,22 +23,44 @@ const (
 )
 
 func renderChat(responseTxt string, user ROLE) *fyne.Container {
-	// Create a single label for the entire text
+	botRes := loadImageAsIcon("assets/chatbot.svg")
+	personRes := loadImageAsIcon("assets/person.svg")
+
+	// Create image objects
+	botImg := canvas.NewImageFromResource(botRes)
+	personImg := canvas.NewImageFromResource(personRes)
+
+	botImg.FillMode = canvas.ImageFillContain
+	personImg.FillMode = canvas.ImageFillContain
+
+	botImg.SetMinSize(fyne.NewSize(48, 48))
+	personImg.SetMinSize(fyne.NewSize(48, 48))
+
+	botIcon := container.NewStack(botImg)
+	personIcon := container.NewStack(personImg)
 
 	responseTxt = removeNewLines(responseTxt)
-	lines := wrapText(responseTxt, float32(1800))
+	lines := wrapText(responseTxt, float32(1700))
 	lineLabel := widget.NewLabel("")
 	for i, line := range lines {
 		lineLabel.Text += line
-		if i == len(lines)-1 {
-			continue
+		if i < len(lines)-1 {
+			lineLabel.Text += "\n"
 		}
-		lineLabel.Text += "\n"
 	}
 
+	// Chat bubble styling
 	chatBox := canvas.NewRectangle(color.RGBA{R: 50, G: 150, B: 200, A: 150})
 	chatBox.CornerRadius = 10
-	return container.NewHBox(container.NewStack(chatBox, lineLabel), layout.NewSpacer())
+
+	bubble := container.NewPadded(container.NewStack(chatBox, lineLabel))
+
+	// Final layout
+	if user == PATIENT {
+		return container.NewHBox(layout.NewSpacer(), bubble, personIcon)
+	} else {
+		return container.NewHBox(botIcon, bubble, layout.NewSpacer())
+	}
 }
 
 func wrapText(text string, maxWidth float32) []string {

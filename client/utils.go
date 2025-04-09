@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"image/color"
 	"log"
+	"os"
 	"strings"
 
 	"fyne.io/fyne/v2"
@@ -115,4 +116,13 @@ func checkValidForms(entires map[*widget.Label]*widget.Entry) (bool, string) {
 	}
 
 	return isValid, ""
+}
+
+func loadImageAsIcon(path string) fyne.Resource {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		log.Printf("⚠️ Failed to read image at %s: %v", path, err)
+		return nil
+	}
+	return fyne.NewStaticResource(path, data)
 }
