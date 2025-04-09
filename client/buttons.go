@@ -59,7 +59,7 @@ func chatHandler(c *Client) buttonHandlerFun {
 		c.Window.SetContent(c.Navbar(c.About()))
 	}
 
-	chatBubble = renderChat(chatBotMsg)
+	chatBubble = renderChat(chatBotMsg, BOT)
 	chatBubbles = append(chatBubbles, chatBubble)
 
 	// a global contianer that contains all the chat bubbles
@@ -73,7 +73,7 @@ func chatHandler(c *Client) buttonHandlerFun {
 		userMsg := userInput.Text
 		if userMsg != "" {
 
-			chatBubble = renderChat(userMsg)
+			chatBubble = renderChat(userMsg, PATIENT)
 			chatBubbles = append(chatBubbles, chatBubble)
 			chatBox.Add(chatBubble)
 			// Clear input and refresh chat display
@@ -94,7 +94,7 @@ func chatHandler(c *Client) buttonHandlerFun {
 
 			wg.Wait()
 
-			chatBubble = renderChat(botResponse)
+			chatBubble = renderChat(botResponse, BOT)
 			chatBubbles = append(chatBubbles, chatBubble)
 			chatBox.Add(chatBubble)
 			chatBox.Refresh()
@@ -114,7 +114,7 @@ func chatHandler(c *Client) buttonHandlerFun {
 			promptWindow("Error", err.Error(), &c.Window)
 		}
 
-		chatBubbles = append(chatBubbles, renderChat(respTxt))
+		chatBubbles = append(chatBubbles, renderChat(respTxt, BOT))
 		chatBox.Add(chatBubbles[len(chatBubbles)-1])
 		chatBox.Refresh()
 	})
