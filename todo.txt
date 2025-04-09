@@ -1,0 +1,3 @@
+- implement a appointment list for doctor
+- implement a markdown rendered for chat completions for chat agents
+- chat divider for chatbot

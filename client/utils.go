@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"image/color"
 	"log"
+	"os"
 	"strings"
 
 	"fyne.io/fyne/v2"
@@ -88,7 +89,7 @@ func promptWindow(title, info string, window *fyne.Window) {
 
 // if valid prompt with valid msg
 // if invalid prompt with your own invalid msgs
-func checkValidForms(operation, validMsg string, window *fyne.Window, entires map[*widget.Label]*widget.Entry) (bool, string) {
+func checkValidForms(entires map[*widget.Label]*widget.Entry) (bool, string) {
 	isValid := true
 	invalidLabels := []string{}
 	for label, entry := range entires {
@@ -115,4 +116,13 @@ func checkValidForms(operation, validMsg string, window *fyne.Window, entires ma
 	}
 
 	return isValid, ""
+}
+
+func loadImageAsIcon(path string) fyne.Resource {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		log.Printf("⚠️ Failed to read image at %s: %v", path, err)
+		return nil
+	}
+	return fyne.NewStaticResource(path, data)
 }

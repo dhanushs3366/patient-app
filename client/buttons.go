@@ -1,12 +1,13 @@
 package client
 
 import (
+	"image/color"
 	"log"
 	"sync"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
 
@@ -47,47 +48,41 @@ func (c *Client) Login() *widget.Button {
 
 func chatHandler(c *Client) buttonHandlerFun {
 	var wg sync.WaitGroup
-	chatHistory := widget.NewRichText()
-	chatHistory.Wrapping = fyne.TextWrapBreak
-
+	// add scrollable feature to chat bubbles
+	chatBubbles := []fyne.CanvasObject{}
+	var chatBubble *fyne.Container
 	// User input field
 	userInput := widget.NewEntry()
 
 	// implement loading progress
 	chatBotMsg, err := c.chatBot.Respond("")
-
-	initialText := &widget.TextSegment{
-		Text:  chatBotMsg,
-		Style: widget.RichTextStyle{},
-	}
-
-	chatHistory.Segments = append(chatHistory.Segments, initialText)
-
 	if err != nil {
-		log.Printf("Error,%s\n", err.Error())
-		// implement a pop up window alerting the patient the system is down
+		promptWindow("Error", "AI bot is down", &c.Window)
+		c.Window.SetContent(c.Navbar(c.About()))
 	}
+	chatBubble = renderChat(chatBotMsg, BOT)
+	chatBubbles = append(chatBubbles, chatBubble)
+	invisHLine := canvas.NewRectangle(color.Transparent)
+	invisHLine.SetMinSize(fyne.NewSize(2, 30)) //invisible horizontal line to add space between each convo
+
+	// a global contianer that contains all the chat bubbles
+	// used to refresh the chatbubbles
+	chatBox := container.NewVBox(chatBubbles...)
 
 	userInput.SetPlaceHolder("Type your message here...")
 	userInput.Wrapping = fyne.TextWrapBreak
 
-	sendButton := widget.NewButton("Send", func() {
+	sendBtnFunc := func() {
 		userMsg := userInput.Text
 		if userMsg != "" {
 
-			userSegment := &widget.TextSegment{
-				Text: userMsg + "\n",
-				Style: widget.RichTextStyle{
-					ColorName: theme.ColorNamePrimary,
-				},
-			}
-
-			// Add segment to chat history
-			chatHistory.Segments = append(chatHistory.Segments, userSegment)
-
+			chatBubble = renderChat(userMsg, PATIENT)
+			chatBubbles = append(chatBubbles, chatBubble)
+			chatBox.Add(chatBubble)
+			chatBox.Add(invisHLine)
 			// Clear input and refresh chat display
 			userInput.SetText("")
-			chatHistory.Refresh()
+			chatBox.Refresh()
 
 			var botResponse string
 			wg.Add(1)
@@ -102,17 +97,15 @@ func chatHandler(c *Client) buttonHandlerFun {
 			}()
 
 			wg.Wait()
-			botTextSegment := &widget.TextSegment{
-				Text: botResponse,
-				Style: widget.RichTextStyle{
-					ColorName: theme.ColorNamePrimary,
-				},
-			}
 
-			chatHistory.Segments = append(chatHistory.Segments, botTextSegment)
-			chatHistory.Refresh()
+			chatBubble = renderChat(botResponse, BOT)
+			chatBubbles = append(chatBubbles, chatBubble)
+			chatBox.Add(chatBubble)
+			chatBox.Add(invisHLine)
+			chatBox.Refresh()
 		}
-	})
+	}
+	sendButton := widget.NewButton("Send", sendBtnFunc)
 
 	bookAppointment := widget.NewButton("Book", func() {
 		c.Window.SetContent(c.Navbar(c.BookDoctor()))
@@ -120,16 +113,30 @@ func chatHandler(c *Client) buttonHandlerFun {
 
 	clearChat := widget.NewButton("Clear", func() {
 		c.chatBot.Close()
-		chatHistory.Segments = chatHistory.Segments[:1]
-		chatHistory.Refresh()
+		chatBubbles = []fyne.CanvasObject{}
+		chatBox.Objects = nil
+		respTxt, err := c.chatBot.Respond("")
+		if err != nil {
+			promptWindow("Error", err.Error(), &c.Window)
+		}
+
+		chatBubbles = append(chatBubbles, renderChat(respTxt, BOT))
+		chatBox.Add(chatBubbles[len(chatBubbles)-1])
+		chatBox.Add(invisHLine)
+		chatBox.Refresh()
 	})
+
+	userInput.OnSubmitted = func(_ string) {
+		sendBtnFunc()
+	}
 
 	userInputContainer := container.NewGridWithRows(2, userInput, container.NewGridWithColumns(3, sendButton, bookAppointment, clearChat))
 	// add a toolbar for filtering doctors
-	content := container.NewBorder(nil, userInputContainer, nil, nil, chatHistory)
+	chatBox = container.NewVBox(chatBubbles...)
+	chatRoom := container.NewBorder(nil, userInputContainer, nil, nil, container.NewVScroll(chatBox))
 
 	handler := func() {
-		c.Window.SetContent(c.Navbar(content))
+		c.Window.SetContent(c.Navbar(chatRoom))
 	}
 
 	return handler
