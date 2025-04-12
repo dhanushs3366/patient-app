@@ -28,14 +28,6 @@ func (c *Client) chatBtn() *widget.Button {
 	return chat
 }
 
-func (c *Client) streamBtn() *widget.Button {
-	stream := widget.NewButton("Stream", func() {
-		log.Println("Streaming")
-	})
-
-	return stream
-}
-
 func (c *Client) Login() *widget.Button {
 	login := widget.NewButton("Login", func() {
 		c.Window.SetContent(c.Navbar(c.DoctorLogin()))
